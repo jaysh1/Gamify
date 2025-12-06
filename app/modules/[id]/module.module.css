@@ -1,0 +1,188 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.backLink {
+  display: inline-block;
+  color: #667eea;
+  margin-bottom: 20px;
+  transition: color 0.3s ease;
+}
+
+.backLink:hover {
+  color: #764ba2;
+}
+
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px 20px;
+  margin: 0 -20px 30px -20px;
+  border-radius: 8px;
+}
+
+.header h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.header p {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.progressContainer {
+  margin-bottom: 30px;
+}
+
+.progressBar {
+  width: 100%;
+  height: 10px;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.lessonsSection h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.lessonsList {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.lessonCard {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-left: 4px solid #667eea;
+}
+
+.lessonCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateX(4px);
+}
+
+.lessonCard.completed {
+  border-left-color: #4caf50;
+  background-color: #f9fff9;
+}
+
+.lessonHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.lessonNumber {
+  font-size: 0.85rem;
+  color: #999;
+  text-transform: uppercase;
+}
+
+.completedBadge {
+  background-color: #4caf50;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.lessonCard h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.lessonCard p {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.lessonProgress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.smallProgressBar {
+  flex: 1;
+  height: 6px;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.smallProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+.lessonProgress span {
+  font-size: 0.85rem;
+  color: #999;
+  min-width: 40px;
+}
+
+.error {
+  background-color: #fee;
+  border: 1px solid #f99;
+  color: #c33;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.loadingMessage {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header {
+    padding: 20px 16px;
+    margin: 0 -16px 20px -16px;
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .lessonCard {
+    padding: 16px;
+  }
+
+  .lessonCard h3 {
+    font-size: 1.1rem;
+  }
+}
