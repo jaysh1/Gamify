@@ -1,0 +1,133 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String              @id @default(cuid())
+  email             String              @unique
+  name              String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  lessonProgress    LessonProgress[]
+  studentMilestones StudentMilestone[]
+}
+
+model Subject {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  code        String      @unique
+  modules     Module[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Module {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  subjectId   String
+  subject     Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  order       Int
+  lessons     Lesson[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([subjectId, order])
+}
+
+model Lesson {
+  id                String               @id @default(cuid())
+  title             String
+  description       String?
+  moduleId          String
+  module            Module               @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  order             Int
+  content           String
+  videoUrl          String?
+  duration          Int?
+  interactiveComponents InteractiveComponent[]
+  mediaAssets       MediaAsset[]
+  lessonProgress    LessonProgress[]
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  @@unique([moduleId, order])
+}
+
+model InteractiveComponent {
+  id        String   @id @default(cuid())
+  type      String   // "quiz", "reflection_prompt", "discussion"
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title     String
+  prompt    String
+  options   String?  // JSON string for quiz options
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([lessonId, order])
+}
+
+model MediaAsset {
+  id        String   @id @default(cuid())
+  type      String   // "video", "image", "document", "audio"
+  url       String
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title     String?
+  metadata  String?  // JSON metadata (e.g., duration, dimensions)
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([lessonId, order])
+}
+
+model MasteryMilestone {
+  id                String              @id @default(cuid())
+  name              String
+  description       String?
+  threshold         Int                 // percentage required to achieve milestone
+  studentMilestones StudentMilestone[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+}
+
+model StudentMilestone {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  milestoneId String
+  milestone   MasteryMilestone  @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  achievedAt  DateTime
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([userId, milestoneId])
+}
+
+model LessonProgress {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed Boolean  @default(false)
+  progress  Int      @default(0)  // percentage
+  startedAt DateTime @default(now())
+  completedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, lessonId])
+}
