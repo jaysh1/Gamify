@@ -1,15 +1,13 @@
-import { PrismaClient } from '../generated/prisma/client';
-
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-} as any);
+import { prisma } from '../src/lib/prisma';
+import { initializeBadges } from '../src/services/badgeService';
 
 async function main() {
   // Clear existing data
+  await prisma.userBadge.deleteMany({});
+  await prisma.xPTransaction.deleteMany({});
+  await prisma.streakLog.deleteMany({});
+  await prisma.userLevel.deleteMany({});
+  await prisma.badge.deleteMany({});
   await prisma.studentMilestone.deleteMany({});
   await prisma.lessonProgress.deleteMany({});
   await prisma.masteryMilestone.deleteMany({});
@@ -463,6 +461,9 @@ async function main() {
       achievedAt: new Date(),
     },
   });
+
+  // Initialize badges
+  await initializeBadges();
 
   console.log('Seed data created successfully!');
 }

@@ -1,0 +1,191 @@
+.leaderboard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.filterButton {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterButton:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.filterButton.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  color: white;
+}
+
+.filterButton:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.userRank {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.rankLabel {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.rankNumber {
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.totalUsers {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.entries {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.entry:hover {
+  background: #e9ecef;
+  transform: translateX(4px);
+}
+
+.entry.currentUser {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border: 2px solid #667eea;
+}
+
+.rankBadge {
+  font-size: 24px;
+  font-weight: bold;
+  min-width: 40px;
+  text-align: center;
+  color: #667eea;
+}
+
+.userInfo {
+  flex: 1;
+}
+
+.userName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.youBadge {
+  background: #667eea;
+  color: white;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.userStats {
+  font-size: 14px;
+  color: #666;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.loading,
+.error {
+  padding: 24px;
+  text-align: center;
+  border-radius: 16px;
+  background: #f5f5f5;
+  color: #333;
+}
+
+.error {
+  background: #fee;
+  color: #c00;
+}
+
+@media (max-width: 768px) {
+  .leaderboard {
+    padding: 16px;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .filterButton {
+    padding: 12px;
+  }
+
+  .entry {
+    padding: 12px;
+  }
+
+  .rankBadge {
+    font-size: 20px;
+    min-width: 32px;
+  }
+
+  .userName {
+    font-size: 14px;
+  }
+
+  .userStats {
+    font-size: 12px;
+  }
+}

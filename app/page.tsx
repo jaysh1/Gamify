@@ -41,6 +41,9 @@ export default function Home() {
       <header className={styles.header}>
         <h1>Year 8 Dooren Syllabus</h1>
         <p>Interactive learning platform</p>
+        <Link href="/dashboard" className={styles.dashboardLink}>
+          🎮 View Dashboard
+        </Link>
       </header>
 
       {error && (
