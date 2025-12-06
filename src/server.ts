@@ -1,20 +1,38 @@
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import { PrismaClient } from '../generated/prisma/client';
+import { prisma } from './lib/prisma';
+import {
+  awardLessonCompletionXP,
+  awardQuizXP,
+  awardModuleCompletionXP,
+  checkModuleCompletion,
+  getXPForNextLevel,
+} from './services/xpService';
+import {
+  recordDailyLogin,
+  getCurrentStreak,
+  getStreakHistory,
+} from './services/streakService';
+import {
+  checkAndAwardBadges,
+  getUserBadges,
+} from './services/badgeService';
+import {
+  getGlobalLeaderboard,
+  getClassLeaderboard,
+  getSubjectLeaderboard,
+  getLeaderboardWithUser,
+} from './services/leaderboardService';
+import { startCronJobs } from './services/cronService';
 
 const app = express();
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
-} as any);
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+startCronJobs();
 
 // Middleware for error handling
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
@@ -172,20 +190,22 @@ app.get('/api/users/:userId/lessons/:lessonId/progress', async (req: Request, re
 app.put('/api/users/:userId/lessons/:lessonId/progress', async (req: Request, res: Response) => {
   try {
     const { userId, lessonId } = req.params;
-    const { completed, progress } = req.body;
+    const { completed, progress, quizScore } = req.body;
 
     const existingProgress = await prisma.lessonProgress.findUnique({
       where: { userId_lessonId: { userId, lessonId } },
     });
 
     let updated;
+    const wasAlreadyCompleted = existingProgress?.completed || false;
+
     if (existingProgress) {
       updated = await prisma.lessonProgress.update({
         where: { userId_lessonId: { userId, lessonId } },
         data: {
           completed: completed !== undefined ? completed : existingProgress.completed,
           progress: progress !== undefined ? progress : existingProgress.progress,
-          completedAt: completed ? new Date() : null,
+          completedAt: completed ? new Date() : existingProgress.completedAt,
         },
       });
     } else {
@@ -200,7 +220,32 @@ app.put('/api/users/:userId/lessons/:lessonId/progress', async (req: Request, re
       });
     }
 
-    res.json(updated);
+    let xpResult;
+    if (completed && !wasAlreadyCompleted) {
+      xpResult = await awardLessonCompletionXP(userId, lessonId);
+
+      const lesson = await prisma.lesson.findUnique({
+        where: { id: lessonId },
+        select: { moduleId: true },
+      });
+
+      if (lesson) {
+        const moduleCompleted = await checkModuleCompletion(userId, lesson.moduleId);
+        if (moduleCompleted) {
+          const moduleXpResult = await awardModuleCompletionXP(userId, lesson.moduleId);
+          xpResult = moduleXpResult;
+        }
+      }
+
+      await checkAndAwardBadges(userId);
+    }
+
+    if (quizScore !== undefined && quizScore !== null) {
+      xpResult = await awardQuizXP(userId, lessonId, quizScore);
+      await checkAndAwardBadges(userId);
+    }
+
+    res.json({ ...updated, xpResult });
   } catch (error) {
     console.error('Error updating progress:', error);
     res.status(500).json({ error: 'Failed to update progress' });
@@ -251,6 +296,132 @@ app.get('/api/subjects', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching subjects:', error);
     res.status(500).json({ error: 'Failed to fetch subjects' });
+  }
+});
+
+app.post('/api/users/:userId/gamification/login', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const result = await recordDailyLogin(userId);
+    await checkAndAwardBadges(userId);
+    res.json(result);
+  } catch (error) {
+    console.error('Error recording daily login:', error);
+    res.status(500).json({ error: 'Failed to record daily login' });
+  }
+});
+
+app.get('/api/users/:userId/gamification/stats', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    let userLevel = await prisma.userLevel.findUnique({
+      where: { userId },
+    });
+
+    if (!userLevel) {
+      userLevel = await prisma.userLevel.create({
+        data: { userId, totalXP: 0, level: 1 },
+      });
+    }
+
+    const currentStreak = await getCurrentStreak(userId);
+    const xpForNextLevel = getXPForNextLevel(userLevel.level);
+
+    res.json({
+      level: userLevel.level,
+      totalXP: userLevel.totalXP,
+      xpForNextLevel,
+      currentStreak,
+    });
+  } catch (error) {
+    console.error('Error fetching gamification stats:', error);
+    res.status(500).json({ error: 'Failed to fetch gamification stats' });
+  }
+});
+
+app.get('/api/users/:userId/gamification/xp-transactions', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    const transactions = await prisma.xPTransaction.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: offset,
+    });
+
+    res.json(transactions);
+  } catch (error) {
+    console.error('Error fetching XP transactions:', error);
+    res.status(500).json({ error: 'Failed to fetch XP transactions' });
+  }
+});
+
+app.get('/api/users/:userId/gamification/badges', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const badges = await getUserBadges(userId);
+    res.json(badges);
+  } catch (error) {
+    console.error('Error fetching badges:', error);
+    res.status(500).json({ error: 'Failed to fetch badges' });
+  }
+});
+
+app.get('/api/users/:userId/gamification/streak', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const days = parseInt(req.query.days as string) || 90;
+    const history = await getStreakHistory(userId, days);
+    const currentStreak = await getCurrentStreak(userId);
+
+    res.json({
+      currentStreak,
+      history,
+    });
+  } catch (error) {
+    console.error('Error fetching streak data:', error);
+    res.status(500).json({ error: 'Failed to fetch streak data' });
+  }
+});
+
+app.get('/api/gamification/leaderboard', async (req: Request, res: Response) => {
+  try {
+    const type = (req.query.type as string) || 'global';
+    const userId = req.query.userId as string;
+    const classId = req.query.classId as string;
+    const subjectId = req.query.subjectId as string;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const offset = parseInt(req.query.offset as string) || 0;
+
+    let leaderboard;
+
+    if (userId) {
+      leaderboard = await getLeaderboardWithUser(
+        userId,
+        type as 'global' | 'class' | 'subject',
+        classId,
+        subjectId,
+        limit
+      );
+    } else if (type === 'class' && classId) {
+      const entries = await getClassLeaderboard(classId, limit, offset);
+      leaderboard = { entries, userRank: null, totalUsers: 0 };
+    } else if (type === 'subject' && subjectId) {
+      const entries = await getSubjectLeaderboard(subjectId, limit, offset);
+      leaderboard = { entries, userRank: null, totalUsers: 0 };
+    } else {
+      const entries = await getGlobalLeaderboard(limit, offset);
+      leaderboard = { entries, userRank: null, totalUsers: 0 };
+    }
+
+    res.json(leaderboard);
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    res.status(500).json({ error: 'Failed to fetch leaderboard' });
   }
 });
 

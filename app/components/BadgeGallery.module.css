@@ -1,0 +1,214 @@
+.badgeGallery {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.progress {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.filterButton {
+  padding: 8px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 20px;
+  background: white;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterButton:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.filterButton.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  color: white;
+}
+
+.filterButton:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.badgeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.badge {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.badge:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.badge.locked {
+  opacity: 0.5;
+  filter: grayscale(100%);
+}
+
+.badge.common {
+  border-color: #95a5a6;
+}
+
+.badge.rare {
+  border-color: #3498db;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0.1) 100%);
+}
+
+.badge.epic {
+  border-color: #9b59b6;
+  background: linear-gradient(135deg, rgba(155, 89, 182, 0.05) 0%, rgba(155, 89, 182, 0.1) 100%);
+}
+
+.badge.legendary {
+  border-color: #f39c12;
+  background: linear-gradient(135deg, rgba(243, 156, 18, 0.05) 0%, rgba(243, 156, 18, 0.1) 100%);
+}
+
+.badgeIcon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.badgeName {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.badgeDescription {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+}
+
+.badgeFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.rarity {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.rarity.common {
+  background: #ecf0f1;
+  color: #7f8c8d;
+}
+
+.rarity.rare {
+  background: #d6eaf8;
+  color: #2980b9;
+}
+
+.rarity.epic {
+  background: #ebdef0;
+  color: #8e44ad;
+}
+
+.rarity.legendary {
+  background: #fdebd0;
+  color: #d68910;
+}
+
+.xpReward {
+  font-size: 14px;
+  font-weight: 600;
+  color: #27ae60;
+}
+
+.awardedDate {
+  font-size: 12px;
+  color: #999;
+  margin: 8px 0 0 0;
+  font-style: italic;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.loading {
+  padding: 40px;
+  text-align: center;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .badgeGallery {
+    padding: 16px;
+  }
+
+  .badgeGrid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .badge {
+    padding: 16px;
+  }
+
+  .badgeIcon {
+    font-size: 36px;
+  }
+
+  .badgeName {
+    font-size: 16px;
+  }
+
+  .badgeDescription {
+    font-size: 12px;
+  }
+}

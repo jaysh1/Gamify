@@ -7,17 +7,22 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 model User {
   id                String              @id @default(cuid())
   email             String              @unique
   name              String?
+  classId           String?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   lessonProgress    LessonProgress[]
   studentMilestones StudentMilestone[]
+  userLevel         UserLevel?
+  xpTransactions    XPTransaction[]
+  streakLogs        StreakLog[]
+  userBadges        UserBadge[]
 }
 
 model Subject {
@@ -130,4 +135,79 @@ model LessonProgress {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, lessonId])
+}
+
+model UserLevel {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level     Int      @default(1)
+  totalXP   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model XPTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Int
+  reason    String
+  metadata  String?  // JSON metadata (e.g., lessonId, quizScore)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model StreakLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime
+  loggedIn  Boolean  @default(true)
+  streakCount Int    @default(1)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model Badge {
+  id          String      @id @default(cuid())
+  name        String
+  description String
+  category    String      // "streak", "completion", "performance", "mastery"
+  criteria    String      // JSON criteria for earning the badge
+  iconUrl     String?
+  rarity      String      @default("common") // "common", "rare", "epic", "legendary"
+  xpReward    Int         @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  userBadges  UserBadge[]
+
+  @@unique([name, category])
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  awardedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+}
+
+model Level {
+  id          String   @id @default(cuid())
+  level       Int      @unique
+  requiredXP  Int
+  title       String
+  description String?
+  rewards     String?  // JSON rewards (e.g., badges, features)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
